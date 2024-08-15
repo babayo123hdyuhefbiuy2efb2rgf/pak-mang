@@ -12,18 +12,18 @@ bool started = false;
 
 static void receiveMode()
 {
-    Serial3.waitDataToBeSent();
+    Serial1.waitDataToBeSent();
     digitalWrite(BOARD_LED_PIN, LOW);
     asm volatile("nop");
     // Disabling transmitter
-    Serial3.enableTransmitter(false);
+    Serial1.enableTransmitter(false);
 
     // Sets the direction to receiving
     digitalWrite(DIRECTION_TTL, HIGH);
     digitalWrite(DIRECTION_485, LOW);
 
     // Enabling the receiver
-    Serial3.enableReceiver(true);
+    Serial1.enableReceiver(true);
     asm volatile("nop");
     delay_us(5);
 }
@@ -33,7 +33,7 @@ static void transmitMode()
     digitalWrite(BOARD_LED_PIN, HIGH);
     asm volatile("nop");
     // Disabling the receiver
-    Serial3.enableReceiver(false);
+    Serial1.enableReceiver(false);
 
     // Sets the direction to transmitting
     digitalWrite(DIRECTION_TTL, LOW);
@@ -41,7 +41,7 @@ static void transmitMode()
 
     // Enabling the transmitter
     // pinMode(Serial3.txPin(), PWM);
-    Serial3.enableTransmitter(true);
+    Serial1.enableTransmitter(true);
     asm volatile("nop");
     delay_us(5);
 }
@@ -51,7 +51,7 @@ void goForward(int baud)
     pinMode(BOARD_LED_PIN, OUTPUT);
     pinMode(DIRECTION_TTL, OUTPUT);
     pinMode(DIRECTION_485, OUTPUT);
-    Serial3.begin(baud);
+    Serial1.begin(baud);
     receiveMode();
     started = true;
 }
@@ -84,10 +84,10 @@ void loop()
     static unsigned int t;
 
     if (started) {
-        while (Serial3.available()) {
+        while (Serial1.available()) {
             char buffer[64];
             unsigned int n = 0;
-            while (Serial3.available() && n<sizeof(buffer)) {
+            while (Serial1.available() && n<sizeof(buffer)) {
                 buffer[n++] = Serial3.read();
             }
             SerialUSB.write(buffer, n);
@@ -102,7 +102,7 @@ void loop()
         }
         if (transmitting) {
             while (SerialUSB.available()) {
-                Serial3.write(SerialUSB.read());
+                Serial1.write(SerialUSB.read());
             }
             t++;
             if (t > 1) {
